@@ -1,0 +1,62 @@
+/-------------------------------------------------------------------------------------------------/
+FUNCIONAMIENTO
+
+La idea del programa es la de un corrector ortográfico, en el cual se le pasa un archivo de texto de entrada,
+y como salida genera un archivo en el cual, si alguna de las palabras no se encuentra en el diccionario
+(lemario-general-del-espanol.txt en este caso), genera sugerencias y las escribe en un nuevo archivo de texto.
+
+Las sugerencias se crean del siguiente modo, si una palabra no esta
+presente en el diccionario, usan 5 técnicas para generar posibles sugerencias.
+Las cinco técnicas usadas son:
+* Intercambiar cada par de caracteres adyacentes en la palabra
+* Entre cada par de caracteres de la palabra, insertar cada letra de la ’A’ a l a ’Z’
+* Eliminar cada caracter de la palabra
+* Reemplazar cada caracter de la palabra con cada letra de la ’A’ a l a ’Z’
+* Separar la palabra en un par de palabras agregando un espacio entre cada par de caracteres
+adyacentes en la palabra. En este caso, se debería sugerir si ambas palabras pertecen al
+Universo.
+
+Vale aclarar que cada palabra generada por estas técnicas es buscada en el diccionario, y en caso de encontrarse,
+se agrega a una lista de posibles sugerencias.
+
+/-------------------------------------------------------------------------------------------------/
+SOBRE LAS TABLAS HASH
+
+Las tablas hash implementadas acá son medias complicadas de entender, no sé si es la mejor manera de hacer las cosas 
+pero anda bastante rápido, al menos para el diccionario de ejemplo.
+
+Funciona así, primero se crea un arreglo de strings con todas las palabras del diccionario dado.
+Luego se crea una tabla hash auxiliar de tamaño HT1_SIZE (es este caso, 130). 
+Esta tabla hash está implementada con encadenamiento separado, es decir, por cada índice vamos a tener una lista enlazada
+con alrededor de 700 palabras. La función hash que usamos para esta tabla hash auxiliar, 
+va a ser la misma que vamos a usar para el primer y segundo nivel de la tabla hash final.
+
+Luego vamos a usar esta tabla auxiliar para comenzar a ingresar las palabras a una tabla hash similar, 
+pero en vez de tener una lista enlazada por cada índice, va a tener otra tabla hash. Como usamos la misma función que antes, 
+lo único que hacemos es iterar sobre el tamaño de la tabla.
+
+Con esto tenemos que insertar las 700 palabras (aprox) en el índice correspondiente.
+Tomamos como tamaño las 700(o el tamaño que sea) al cuadrado, ya que esto asegura sólo un 50% de probabilidad de colision.
+Si hay una colision, borramos todo lo que hicimos en el índice en el que estamos y empezamos la lista desde 0
+(Por esto necesitabamos la tabla hash auxiliar. Si tratabamos de ingresarlas directamente desde el diccionario, 
+la cosa se complicaba o era más lenta).
+Como hay solamente un 50%, no va a tardar mucho en llenar toda la tabla para todos los índices.
+
+/-------------------------------------------------------------------------------------------------/
+CÓMO COMPILAR
+gcc -o main main.c create_hashtable.c read_file_words.c strings_modify.c
+./main archivoEntrada archivoSalida
+
+archivoEntrada es un archivo de texto a leer.
+archivoSalida es un archivo de texto donde se guardan todas las sugerencias a posibles errores ortográficos.
+
+
+/-------------------------------------------------------------------------------------------------/
+NOTAS FINALES
+
+Esto lo hice como ejercicio para tablas hash, por lo que no funciona muy bien como corrector ortográfico, 
+habría que modificar unas cuantas cosas para hacerlo funcionar bien. De todas maneras estoy conforme ya que 
+el programa busca las palabras en el diccionario correctamente, si el diccionario fuera mejor, 
+tal vez el programa funcionaría mejor. Además se le podría agregar algún tipo de excepciones, 
+ya que algunas palabras si está en plural, no las encuentra. Por ejemplo, "palabras" sugiere "palabra s".
+/-------------------------------------------------------------------------------------------------/
