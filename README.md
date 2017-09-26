@@ -1,1 +1,0 @@
-# corrector_ortografico
